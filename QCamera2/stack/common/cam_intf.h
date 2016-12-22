@@ -255,6 +255,11 @@ typedef struct {
   cam_related_system_calibration_data_t otp_calibration_data;
 } cam_jpeg_metadata_t;
 
+typedef struct {
+  cam_dimension_t  dim;
+  cam_fps_range_t fps;
+  int32_t mode;
+} sensor_res_table_t;
 /* capability struct definition for HAL 1*/
 struct cam_capability;
 typedef struct cam_capability{
@@ -674,6 +679,9 @@ typedef struct cam_capability{
 
     /* sensor rotation */
     int32_t sensor_rotation;
+    char sensor_name[128];
+    sensor_res_table_t sensor_res_tbl[MAX_SIZES_CNT];
+    size_t sensor_res_tbl_cnt;
 
     /*Mono Stats support*/
     uint8_t is_mono_stats_suport;
@@ -840,6 +848,13 @@ typedef struct cam_stream_info {
             (NULL)); \
         if (NULL != META_PTR_NAME) \
 
+#define IF_META_NOT_AVAILABLE(META_TYPE, META_PTR_NAME, META_ID, TABLE_PTR) \
+        META_TYPE *META_PTR_NAME = \
+        (((NULL != TABLE_PTR) && (TABLE_PTR->is_valid[META_ID])) ? \
+            (&TABLE_PTR->data.member_variable_##META_ID[ 0 ]) : \
+            (NULL)); \
+        if (!META_PTR_NAME) \
+
 #define ADD_SET_PARAM_ENTRY_TO_BATCH(TABLE_PTR, META_ID, DATA) \
     ((NULL != TABLE_PTR) ? \
     ((TABLE_PTR->data.member_variable_##META_ID[ 0 ] = DATA), \
@@ -949,6 +964,8 @@ typedef struct {
     INCLUDE(CAM_INTF_META_CHROMATIX_LITE_AF,            cam_chromatix_lite_af_stats_t,  1);
     INCLUDE(CAM_INTF_META_CHROMATIX_LITE_ASD,           cam_chromatix_lite_asd_stats_t, 1);
     INCLUDE(CAM_INTF_BUF_DIVERT_INFO,                   cam_buf_divert_info_t,          1);
+    INCLUDE(CAM_INTF_PARM_FACE_BEAUTY_LEVEL,            uint32_t,                    1);
+    INCLUDE(CAM_INTF_PARM_FACE_INFO,                    cam_face_detection_data_t,   1);
 
     /* Specific to HAL3 */
     INCLUDE(CAM_INTF_META_FRAME_NUMBER_VALID,           int32_t,                     1);
@@ -1163,6 +1180,8 @@ typedef struct {
     INCLUDE(CAM_INTF_META_REPROCESS_FLAGS,              uint8_t,                     1);
     INCLUDE(CAM_INTF_PARM_JPEG_ENCODE_CROP,             cam_stream_crop_info_t,      1);
     INCLUDE(CAM_INTF_PARM_JPEG_SCALE_DIMENSION,         cam_dimension_t,             1);
+    INCLUDE(CAM_INTF_META_FV,                           int,                         1);
+    INCLUDE(CAM_INTF_META_FRAME_SKIP,                   cam_frame_idx_range_t,       1);
     INCLUDE(CAM_INTF_META_FOCUS_DEPTH_INFO,             uint8_t,                     1);
     INCLUDE(CAM_INTF_PARM_HAL_BRACKETING_HDR,           cam_hdr_param_t,             1);
     INCLUDE(CAM_INTF_META_DC_LOW_POWER_ENABLE,          uint8_t,                     1);
